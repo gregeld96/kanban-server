@@ -48,6 +48,23 @@ class TaskController {
         }
     }
 
+    static async assignAccount(req, res, next){
+        try {
+            await TaskService.assignAccount({
+                accountId: req.body.accountId,
+                taskId: req.params.id,
+                auth: req.classified,
+            });
+
+            res.status(201).json({
+                success: true,
+                message: "Success assign user to the task"
+            });
+        } catch (error) {
+            next(error)
+        }
+    }
+
     static async updateTaskCategory(req, res, next){
         try {
             await TaskService.updateCategory({

@@ -124,14 +124,14 @@ class SubtaskService {
             });
 
             console.log(auth.userId);
-            console.log(subtaskExist.detail);
+            console.log(subtaskExist.detail?.task?.accountId);
 
             if (!subtaskExist?.detail) throw ({
                 status: 404,
                 message: 'Data not found!'
             });
 
-            if((!subtaskExist?.detail?.assignId !== auth.userId) || (!subtaskExist?.detail?.task?.accountId !== auth.userId)) throw({
+            if((subtaskExist?.detail?.assignId !== auth.userId) && (subtaskExist?.detail?.task?.accountId !== auth.userId)) throw({
                 status: 401,
                 message: 'You are not authorized!'
             });
@@ -141,6 +141,35 @@ class SubtaskService {
             }, {
                 where: {
                     id: subtaskId
+                }
+            });
+        } catch (error) {
+            throw ({
+                error
+            })
+        }
+    }
+
+    static async removeData({
+        id
+    }) {
+        try {
+            let existId = await Subtask.findByPk(Number(id));
+
+            if (!existId) throw ({
+                status: 404,
+                message: 'Data not found!'
+            })
+
+            await Subtask.destroy({
+                where: {
+                    id
+                }
+            });
+
+            await TaskComment.destroy({
+                where: {
+                    subtaskId: id
                 }
             });
         } catch (error) {

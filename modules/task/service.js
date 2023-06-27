@@ -52,6 +52,44 @@ class TaskService {
                                 'name'
                             ]
                         }
+                    },
+                    {
+                        model: Subtask,
+                        as: 'subtasks',
+                        include: {
+                            model: Account,
+                            as: 'assignTo',
+                            attributes: [
+                                'id',
+                                'email'
+                            ],
+                            include: {
+                                model: AccountInformation,
+                                as: 'personal',
+                                attributes: [
+                                    'name'
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        model: TaskAccount,
+                        as: 'assign',
+                        include: {
+                            model: Account,
+                            as: 'assign',
+                            attributes: [
+                                'id',
+                                'email'
+                            ],
+                            include: {
+                                model: AccountInformation,
+                                as: 'personal',
+                                attributes: [
+                                    'name'
+                                ]
+                            }
+                        },
                     }
                 ]
             });
@@ -116,6 +154,25 @@ class TaskService {
                                 'name'
                             ]
                         }
+                    },
+                    {
+                        model: TaskAccount,
+                        as: 'assign',
+                        include: {
+                            model: Account,
+                            as: 'assign',
+                            attributes: [
+                                'id',
+                                'email'
+                            ],
+                            include: {
+                                model: AccountInformation,
+                                as: 'personal',
+                                attributes: [
+                                    'name'
+                                ]
+                            }
+                        },
                     }
 
                 ]
@@ -160,6 +217,44 @@ class TaskService {
             }
 
             await Task.create(newTask);
+        } catch (error) {
+            throw ({
+                error
+            })
+        }
+    }
+
+    static async assignAccount({
+        accountId,
+        taskId,
+        auth,
+    }) {
+        try {
+            let userExist = await Account.findByPk(Number(accountId));
+
+            if (!userExist) throw ({
+                status: 404,
+                message: 'User not found!'
+            });
+
+            let taskExist = await this.getById({
+                id: taskId
+            });
+
+            if (!taskExist?.detail) throw ({
+                status: 404,
+                message: 'Data not found!'
+            });
+
+            if(taskExist?.detail?.accountId !== auth.userId) throw({
+                status: 401,
+                message: 'You are not authorized'
+            });
+
+            await TaskAccount.create({
+                taskId,
+                accountId
+            });
         } catch (error) {
             throw ({
                 error
@@ -238,6 +333,24 @@ class TaskService {
                         as: "assignTo"
                     }
                 ]
+            });
+
+            await TaskComment.destroy({
+                where: {
+                    taskId: id
+                }
+            });
+
+            await Subtask.destroy({
+                where: {
+                    taskId: id
+                }
+            });
+
+            await TaskAccount.destroy({
+                where: {
+                    taskId: id
+                }
             });
         } catch (error) {
             throw ({

@@ -5,7 +5,8 @@ const SubTaskController = require('../../modules/subtask/controller');
 routes.use(auth);
 routes.get('/:id', SubTaskController.getById)
 routes.post('/assign/:id', SubTaskController.assign);
-routes.post('/status/:id', SubTaskController.updateStatus)
+routes.put('/status/:id', SubTaskController.updateStatus)
 routes.post('/', SubTaskController.create);
+routes.delete('/:id', SubTaskController.removeData);
 
 module.exports = routes;

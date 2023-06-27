@@ -62,6 +62,21 @@ class SubTaskController {
             next(error)
         }
     }
+
+    static async removeData(req, res, next){
+        try {
+            await SubtaskService.removeData({
+                id: req.params.id
+            });
+            
+            res.status(200).json({
+                success: true,
+                message: "Successful delete subtask!",
+            });
+        } catch (error) {
+            next(error)
+        }
+    }
 }
 
 module.exports = SubTaskController;
