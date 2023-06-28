@@ -2,7 +2,6 @@ const {
     Task,
     Subtask,
     TaskComment,
-    TaskAccount,
     Account,
     AccountInformation
 } = require('../../models');
@@ -122,9 +121,6 @@ class SubtaskService {
             let subtaskExist = await this.getById({
                 id: subtaskId
             });
-
-            console.log(auth.userId);
-            console.log(subtaskExist.detail?.task?.accountId);
 
             if (!subtaskExist?.detail) throw ({
                 status: 404,

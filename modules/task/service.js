@@ -1,5 +1,6 @@
 const CategoryService = require("../category/service");
 const {
+    Category,
     Task,
     Subtask,
     TaskComment,
@@ -16,12 +17,16 @@ class TaskService {
             let detail = await Task.findByPk(Number(id), {
                 include: [
                     {
+                        model: Category,
+                        as: 'category'
+                    },
+                    {
                         model: TaskComment,
                         as: 'comments',
                         // To show comment that only belong to the task only (Subtask comment not included)
-                        where: {
-                            subtaskId: null,
-                        },
+                        // where: {
+                        //     subtaskId: null,
+                        // },
                         include: {
                             model: Account,
                             as: 'account',
@@ -56,6 +61,7 @@ class TaskService {
                     {
                         model: Subtask,
                         as: 'subtasks',
+                        order: [["id", "DESC"]],
                         include: {
                             model: Account,
                             as: 'assignTo',
@@ -217,6 +223,44 @@ class TaskService {
             }
 
             await Task.create(newTask);
+        } catch (error) {
+            throw ({
+                error
+            })
+        }
+    }
+
+    static async update({
+        title,
+        description,
+        taskId,
+        auth,
+    }) {
+        try {
+            if (!title) throw ({
+                status: 400,
+                message: 'Fill up all field!'
+            });
+
+            let taskExist = await this.getById({
+                id: taskId
+            });
+
+            if((taskExist?.detail?.accountId !== auth.userId)) throw({
+                status: 401,
+                message: 'You are not authorized!'
+            });
+
+            let updateData = {
+                title: title ?? taskExist.detail.title,
+                description: description ?? taskExist.detail.description,
+            }
+
+            await Task.update(updateData, {
+                where: {
+                    id: taskId
+                }
+            });
         } catch (error) {
             throw ({
                 error

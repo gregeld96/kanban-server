@@ -48,6 +48,24 @@ class TaskController {
         }
     }
 
+    static async update(req, res, next){
+        try {
+            await TaskService.update({
+                title: req.body.title,
+                description: req.body.description,
+                taskId: req.params.id,
+                auth: req.classified,
+            });
+
+            res.status(200).json({
+                success: true,
+                message: "Success update task"
+            });
+        } catch (error) {
+            next(error)
+        }
+    }
+
     static async assignAccount(req, res, next){
         try {
             await TaskService.assignAccount({
